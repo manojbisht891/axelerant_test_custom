@@ -1,0 +1,5 @@
+name: Test Custom
+type: module
+description: 'Add new field in System Settings Form'
+package: custom
+core: 8.x

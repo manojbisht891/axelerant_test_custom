@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Provides hooks and submit handler to alter site settings form.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Alter System Site Information Settings form to add new
+ * text field and submit handler.
+ */
+function test_custom_form_system_site_information_settings_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  // Loading Configuration.
+  $siteapikey = \Drupal::config('test_custom.settings')->get('siteapikey');
+  // Creating textfield.
+  $form['site_information']['site_api_key'] = [
+    '#type' => 'textfield',
+    '#title' => 'Site Api Key',
+    '#default_value' => !empty($siteapikey) ? $siteapikey : 'No API Key yet',
+  ];
+  // Updating Button Value.
+  $form['actions']['submit']['#value'] = t('Update Configuration');
+  // Adding Custom Submit Handler.
+  $form['#submit'][] = 'test_custom_system_site_information_settings_handler';
+}
+
+/**
+ * Custom submit handler for system site information settings form.
+ */
+function test_custom_system_site_information_settings_handler(&$form, FormStateInterface $form_state) {
+
+  $site_api_key = $form_state->getValue('site_api_key');
+  // Comparing site_api_key with default value.
+  if (strcmp($site_api_key, 'No API Key yet') != 0) {
+    $config = \Drupal::service('config.factory')->getEditable('test_custom.settings');
+    // Setting value.
+    $config->set('siteapikey', $site_api_key)->save();
+    \Drupal::messenger()->addStatus(t('Site API Key has been saved with the value :siteapikey', array(':siteapikey' => $site_api_key)));
+  }
+}
